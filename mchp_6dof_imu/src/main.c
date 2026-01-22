@@ -13,9 +13,6 @@
 
 #define LED0_NODE DT_ALIAS(led0)
 
-#define INT_PIN 7           // PortB7
-#define INT_PORT "GPIOB"    // Name of the GPIO port
-
 static struct sensor_trigger imu_trigger;
 static volatile int irq_from_sensor = 0;
 

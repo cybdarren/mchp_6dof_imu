@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug SAME54",
+            "device": "${config:zephyr.device}",
+            "cwd": "${workspaceFolder}/${config:zephyr.appPath} ",
+            "executable": "${workspaceFolder}/build/zephyr/zephyr.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "openocd",
+            "serverpath": "C:/Masters/OpenOCD/bin/openocd.exe",
+            "gdbPath": "${userHome}/zephyr-sdk-0.17.4/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
+            "configFiles": [
+                "C:/Masters/OpenOCD/share/openocd/scripts/interface/cmsis-dap.cfg",
+                "C:/Masters/OpenOCD/share/openocd/scripts/target/atsame5x.cfg"
+            ],
+            "preLaunchTask": "Flash Zephyr"
+        }
+    ]
+}

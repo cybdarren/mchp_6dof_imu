@@ -1,0 +1,33 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Zephyr",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                "& { . '${workspaceFolder}\\.venv\\Scripts\\Activate.ps1'; west build -b ${config:zephyr.board} ${workspaceFolder}/${config:zephyr.appPath}; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }"
+            ],
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Flash Zephyr",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                "& { . '${workspaceFolder}\\.venv\\Scripts\\Activate.ps1'; west flash -d ${config:zephyr.buildDir}; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }"
+            ],
+            "dependsOn": "Build Zephyr",
+            "dependsOrder": "sequence",
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}

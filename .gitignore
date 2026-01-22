@@ -1,0 +1,45 @@
+# ======================================
+# Out-of-tree build artifacts
+# ======================================
+/build
+/zephyr/build
+/.west
+/zephyr/.west
+
+# ======================================
+# Python virtual environment
+# ======================================
+.venv/
+*.pyc
+__pycache__/
+
+# ======================================
+# Zephyr SDK / external tools
+# ======================================
+/zephyr-sdk
+*.swp
+/bootloader
+/modules
+/tools 
+/zephyr 
+
+# ======================================
+# VS Code
+# ======================================
+#*.code-workspace
+#.vscode/tasks.json        # optional: ignore if you want local overrides
+#.vscode/launch.json       # optional: ignore if you want local overrides
+
+# ======================================
+# OS-specific files
+# ======================================
+.DS_Store
+Thumbs.db
+
+# ======================================
+# Misc
+# ======================================
+*.log
+*.tmp
+*.bak
+*.old

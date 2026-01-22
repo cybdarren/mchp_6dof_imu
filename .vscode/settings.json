@@ -1,0 +1,16 @@
+{
+    // Path to the current Zephyr application folder
+    "zephyr.appPath": "mchp_6dof_imu",
+
+    // Optional defaults for Zephyr builds
+    "zephyr.buildDir": "${workspaceFolder}/build",
+    "zephyr.board": "same54_xpro",
+    "zephyr.device": "ATSAME54P20A",
+
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+
+    "terminal.integrated.env.win": {
+        "ZEPHYR_BASE": "${workspaceFolder}/zephyr",
+        "PATH": "${workspaceFolder}/.venv/Scripts;${env:PATH}"
+    }
+}

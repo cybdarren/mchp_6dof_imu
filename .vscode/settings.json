@@ -4,8 +4,15 @@
 
     // Optional defaults for Zephyr builds
     "zephyr.buildDir": "${workspaceFolder}/build",
-    "zephyr.board": "same54_xpro",
-    "zephyr.device": "ATSAME54P20A",
+//    "zephyr.board": "same54_xpro",
+//    "zephyr.device": "ATSAME54P20A",
+//    "openocd.cfg": "atsame5x.cfg"
+     "zephyr.board": "samd21_iot_wg",
+    // "zephyr.device": "ATSAMD21G18A",
+    // "openocd.cfg": "atsamdXX.cfg",
+//    "zephyr.board": "samd21_xpro",
+//    "zephyr.device": "ATSAMD21J18A",
+//    "openocd.cfg": "atsamdXX.cfg",
 
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
 

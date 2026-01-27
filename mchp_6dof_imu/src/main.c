@@ -1,8 +1,10 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/input/input.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/sensor.h>
+#include <soc.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -11,12 +13,15 @@
 
 #define SLEEP_TIME_MS 1000
 
-#define LED0_NODE DT_ALIAS(led0)
-
 static struct sensor_trigger imu_trigger;
 static volatile int irq_from_sensor = 0;
 
-static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
+//static const struct gpio_dt_spec led1 = GPIO_DT_SPEC_GET(DT_ALIAS(led1), gpios);
+
+static const struct gpio_dt_spec switch0 = GPIO_DT_SPEC_GET(DT_ALIAS(sw0), gpios);
+static const struct gpio_dt_spec switch1 = GPIO_DT_SPEC_GET_OR(DT_ALIAS(sw1), gpios, {0});
+
 static const struct device *imu = DEVICE_DT_GET(DT_ALIAS(imusensor));
 
 static void handle_imu_trigger(const struct device *dev, const struct sensor_trigger *trig)
@@ -33,13 +38,24 @@ static void handle_imu_trigger(const struct device *dev, const struct sensor_tri
     }   
 }
 
+static void button_input_cb(struct input_event *evt, void *user_data)
+{
+    if (evt->sync == 0) {
+        return;
+    }
+
+    printk("Button %d %s\n", evt->code, evt->value ? "pressed" : "released");
+}
+
+INPUT_CALLBACK_DEFINE(NULL, button_input_cb, NULL);
+
 int main(void)
 {
+    int ret;
+    bool led_state = true;
     struct sensor_value accel[3];
     struct sensor_value gyro[3];
     struct sensor_value temperature;
-    int ret;
-    bool led_state = true;
 
     if (!gpio_is_ready_dt(&led)) {
         return 0;
@@ -49,7 +65,17 @@ int main(void)
     if (ret < 0) {
         return 0;
     }
-    led_state = false;
+
+    // enable button interrupts
+    if (device_is_ready(switch0.port)) {
+        gpio_pin_interrupt_configure_dt(&switch0, GPIO_INPUT);  
+    }
+ 
+    if (device_is_ready(switch1.port)) {
+        gpio_pin_interrupt_configure_dt(&switch1, GPIO_INPUT);  
+    }   
+    
+//    gpio_pin_configure_dt(&led1, GPIO_OUTPUT_ACTIVE);
 
     // configure the imu
     if (imu == NULL) {
@@ -69,10 +95,11 @@ int main(void)
         .type = SENSOR_TRIG_DATA_READY,
         .chan = SENSOR_CHAN_ALL,
     };
-    if (sensor_trigger_set(imu, &imu_trigger, handle_imu_trigger)) {
-        printk("Failed to set IMU trigger\n");
-    } else {
+    ret = sensor_trigger_set(imu, &imu_trigger, handle_imu_trigger);
+    if (ret == 0) {
         printk("IMU trigger set successfully\n");
+    } else {
+        printk("Failed to set IMU trigger (%d)\n", ret);
     }
 
     while (1) {
@@ -96,8 +123,8 @@ int main(void)
         }
 
         led_state = !led_state;
-        // printk("LED state: %s\n", led_state ? "ON" : "OFF");
-        // k_msleep(SLEEP_TIME_MS);
+        //printk("LED state: %s\n", led_state ? "ON" : "OFF");
+        k_msleep(SLEEP_TIME_MS);
     }
 
     return 0;

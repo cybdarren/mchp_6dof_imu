@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Cortex Debug SAME54",
-            "device": "${config:zephyr.device}",
+            "device": "ATSAME54P20A",
             "cwd": "${workspaceFolder}/${config:zephyr.appPath} ",
             "executable": "${workspaceFolder}/build/zephyr/zephyr.elf",
             "request": "launch",
@@ -18,6 +18,24 @@
             "configFiles": [
                 "C:/Masters/OpenOCD/share/openocd/scripts/interface/cmsis-dap.cfg",
                 "C:/Masters/OpenOCD/share/openocd/scripts/target/atsame5x.cfg"
+            ],
+            "preLaunchTask": "Flash Zephyr"
+        },
+        {
+            "name": "Cortex Debug SAMD21_XPRO_OT",
+            "device": "ATSAMD21J18A",
+            "cwd": "${workspaceFolder}/${config:zephyr.appPath} ",
+            "executable": "${workspaceFolder}/build/zephyr/zephyr.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "openocd",
+            "serverpath": "C:/Masters/OpenOCD/bin/openocd.exe",
+            "gdbPath": "${userHome}/zephyr-sdk-0.17.4/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
+            "configFiles": [
+//                "${workspaceFolder}/zephyr/boards/atmel/sam0/samd21_xpro/support/openocd.cfg"
+                "C:/Masters/OpenOCD/share/openocd/scripts/interface/cmsis-dap.cfg",
+                "C:/Masters/OpenOCD/share/openocd/scripts/target/at91samdXX.cfg"
             ],
             "preLaunchTask": "Flash Zephyr"
         }

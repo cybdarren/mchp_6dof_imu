@@ -2,6 +2,9 @@
 # Out-of-tree build artifacts
 # ======================================
 /build
+/build_samd21_iot_wg
+/build_samd21_xpro_ot
+/build_same54_xpro
 /zephyr/build
 /.west
 /zephyr/.west

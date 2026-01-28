@@ -49,10 +49,15 @@ static void button_input_cb(struct input_event *evt, void *user_data)
 
 INPUT_CALLBACK_DEFINE(NULL, button_input_cb, NULL);
 
+static struct gpio_callback imu_gpio_cb;
+static void imu_int_cb(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
+{
+    printk("IMU interrupt on pins 0x%08x\n", pins);
+}
+
 int main(void)
 {
     int ret;
-    bool led_state = true;
     struct sensor_value accel[3];
     struct sensor_value gyro[3];
     struct sensor_value temperature;
@@ -90,6 +95,18 @@ int main(void)
         printk("IMU device is not ready\n");
     }
 
+    static struct gpio_dt_spec imu_int_gpio = GPIO_DT_SPEC_GET_OR(DT_ALIAS(imusensor), int_gpios, {0});
+    if (!imu_int_gpio.port) {
+        printk("IMU has no IRQ pin\n");
+    } else {
+        printk("Configuring for interrupts from IMU sensor\n");
+        gpio_init_callback(&imu_gpio_cb, imu_int_cb, BIT(imu_int_gpio.pin));
+        gpio_add_callback(imu_int_gpio.port, &imu_gpio_cb);
+
+        gpio_pin_configure_dt(&imu_int_gpio, GPIO_INPUT);
+//        gpio_pin_interrupt_configure_dt(&imu_int_gpio, GPIO_INT_LEVEL_ACTIVE);
+    } 
+
     // configure interrupts from the IMU
     imu_trigger = (struct sensor_trigger){
         .type = SENSOR_TRIG_DATA_READY,
@@ -103,6 +120,21 @@ int main(void)
     }
 
     while (1) {
+        if (sensor_sample_fetch(imu) < 0) {
+            printk("Sensor sample update error\n");
+        } else {
+            sensor_channel_get(imu, SENSOR_CHAN_ACCEL_XYZ, accel);
+            sensor_channel_get(imu, SENSOR_CHAN_GYRO_XYZ, gyro);
+            sensor_channel_get(imu, SENSOR_CHAN_DIE_TEMP, &temperature);    
+
+            printf("temp " SV_FMT " C  "
+                "accel " SV_FMT " " SV_FMT " " SV_FMT " m/s^2  "
+                "gyro  " SV_FMT " " SV_FMT " " SV_FMT " rad/s\n",
+                SV_ARG(temperature),
+                SV_ARG(accel[0]), SV_ARG(accel[1]), SV_ARG(accel[2]),
+                SV_ARG(gyro[0]),  SV_ARG(gyro[1]),  SV_ARG(gyro[2]));  
+        }
+
         if (irq_from_sensor) {
             sensor_channel_get(imu, SENSOR_CHAN_ACCEL_XYZ, accel);
             sensor_channel_get(imu, SENSOR_CHAN_GYRO_XYZ, gyro);
@@ -122,8 +154,6 @@ int main(void)
             return 0;   
         }
 
-        led_state = !led_state;
-        //printk("LED state: %s\n", led_state ? "ON" : "OFF");
         k_msleep(SLEEP_TIME_MS);
     }
 

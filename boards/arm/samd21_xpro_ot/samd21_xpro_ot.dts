@@ -81,9 +81,9 @@
 };
 
 &sercom0 {
-    status = "disabled";
+    status = "okay";
     compatible = "atmel,sam0-spi";
-    dopo = <2>;
+    dopo = <1>;
     dipo = <0>;
     #address-cells = <1>;
     #size-cells = <0>;
@@ -93,7 +93,7 @@
 };
 
 &sercom1 {
-	status = "okay";
+	status = "disabled";
     compatible = "atmel,sam0-spi";
     dopo = <2>;
     dipo = <0>;

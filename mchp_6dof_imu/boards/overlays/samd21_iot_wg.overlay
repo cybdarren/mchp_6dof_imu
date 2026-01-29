@@ -24,7 +24,10 @@
         reg = <0>;
         spi-max-frequency = <1000000>;
 
-        /* Interrupt line */
+        /*  Interrupt line 
+            PA9: EXTINT9 - DO NOT use PA24/PA25 on SAMD21 
+            this requires hw patch on the mikroe click by shorting
+            INT pin2 to adjacent NC pin3 */
         int-gpios = <&porta 9 GPIO_ACTIVE_HIGH>;
 
         accel-fs = <ICM42688_DT_ACCEL_FS_2>;

@@ -3,15 +3,15 @@
 /{
     aliases {
         imusensor = &icm42688;
-        spi1 = &sercom1; 
+        spi0 = &sercom0; 
     };
 };
 
-&sercom1 {
+&sercom0 {
     status = "okay";
     
     /* Use SPI SS pin as GPIO CS */
-    cs-gpios = <&porta 17 GPIO_ACTIVE_LOW>;
+    cs-gpios = <&porta 5 GPIO_ACTIVE_LOW>;
 
     /* ICM42688 IMU node */
     icm42688: icm42688@0 {
@@ -21,7 +21,7 @@
         spi-max-frequency = <1000000>;
 
         /* Interrupt line */
-        int-gpios = <&portb 14 GPIO_ACTIVE_LOW>;
+        int-gpios = <&portb 4 GPIO_ACTIVE_HIGH>;
 
         accel-fs = <ICM42688_DT_ACCEL_FS_2>;
         accel-odr = <ICM42688_DT_ACCEL_ODR_100>;

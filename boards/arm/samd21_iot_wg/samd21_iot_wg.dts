@@ -113,3 +113,9 @@
 	pinctrl-names = "default";
 }; 
 
+zephyr_udc0: &usb0 {
+	status = "disabled";
+
+	pinctrl-0 = <&usb_dc_default>;
+	pinctrl-names = "default";
+};

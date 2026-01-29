@@ -38,6 +38,22 @@
                 "C:/Masters/OpenOCD/share/openocd/scripts/target/at91samdXX.cfg"
             ],
             "preLaunchTask": "Flash Zephyr"
+        },
+        {
+            "name": "Cortex Debug SAMD21_IOT_WG",
+            "device": "ATSAMD21G18A",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build_samd21_iot_wg/zephyr/zephyr.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "openocd",
+            "serverpath": "C:/Masters/OpenOCD/bin/openocd.exe",
+            "gdbPath": "${userHome}/zephyr-sdk-0.17.4/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
+            "configFiles": [
+                "${workspaceFolder}/boards/samd21_iot_wg/support/openocd.cfg"
+            ],
+            "preLaunchTask": "Flash Zephyr"
         }
     ]
 }

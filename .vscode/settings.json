@@ -3,7 +3,7 @@
     "zephyr.appPath": "mchp_6dof_imu",
 
     // Optional defaults for Zephyr builds
-    "zephyr.buildDir": "${workspaceFolder}/build",
+    "zephyr.buildDir": "${workspaceFolder}/build_samd21_iot_wg",
 //    "zephyr.board": "same54_xpro",
 //    "zephyr.device": "ATSAME54P20A",
 //    "openocd.cfg": "atsame5x.cfg"

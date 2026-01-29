@@ -9,7 +9,7 @@
                 "-NoProfile",
                 "-ExecutionPolicy", "Bypass",
                 "-Command",
-                "& { . '${workspaceFolder}\\.venv\\Scripts\\Activate.ps1'; west build -b ${config:zephyr.board} ${workspaceFolder}/${config:zephyr.appPath}; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }"
+                "& { . '${workspaceFolder}\\.venv\\Scripts\\Activate.ps1'; west build -b ${config:zephyr.board} ${workspaceFolder}/${config:zephyr.appPath} -d ${config:zephyr.buildDir} -- -DBOARD_ROOT=${workspaceFolder}; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }"
             ],
             "group": { "kind": "build", "isDefault": true },
             "problemMatcher": ["$gcc"]

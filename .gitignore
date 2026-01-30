@@ -8,6 +8,7 @@
 /zephyr/build
 /.west
 /zephyr/.west
+/Kconfig 
 
 # ======================================
 # Python virtual environment

@@ -12,7 +12,11 @@ if(DEFINED BOARD)
     list(APPEND DTC_OVERLAY_FILE
       ${CMAKE_CURRENT_SOURCE_DIR}/boards/overlays/samd21_iot_wg.overlay
     )
-  elseif(BOARD STREQUAL "samd21_xpro_ot")
+  elseif(BOARD STREQUAL "samd21_iot_wg2")
+    list(APPEND DTC_OVERLAY_FILE
+      ${CMAKE_CURRENT_SOURCE_DIR}/boards/overlays/samd21_iot_wg2.overlay
+    )
+    elseif(BOARD STREQUAL "samd21_xpro_ot")
     list(APPEND DTC_OVERLAY_FILE
       ${CMAKE_CURRENT_SOURCE_DIR}/boards/overlays/samd21_xpro_ot.overlay
     )
@@ -24,4 +28,6 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(mchp_6dof_imu)
 
-target_sources(app PRIVATE src/main.c)
+target_sources(app PRIVATE
+    src/main.c
+)

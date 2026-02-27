@@ -3,8 +3,11 @@
 # ======================================
 /build
 /build_samd21_iot_wg
+/build_samd21_iot_wg2
 /build_samd21_xpro_ot
 /build_same54_xpro
+/build_arduino_nano_33_iot
+/build_mchp_gfx
 /zephyr/build
 /.west
 /zephyr/.west

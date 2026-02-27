@@ -56,6 +56,8 @@ int main(void)
     struct sensor_value gyro[3];
     struct sensor_value temperature;
 
+    printk("Application started\n");
+
     if (!gpio_is_ready_dt(&led)) {
         return 0;
     }
@@ -73,7 +75,7 @@ int main(void)
     if (device_is_ready(switch1.port)) {
         gpio_pin_interrupt_configure_dt(&switch1, GPIO_INPUT);  
     }   
-
+ 
     // configure the imu
     if (imu == NULL) {
         printk("IMU device not found\n");

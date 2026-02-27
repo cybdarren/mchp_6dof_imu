@@ -35,3 +35,23 @@
     };
 };
 
+&sercom1 {
+    status = "okay";
+
+    /* Use SPI SS pin as GPIO CS */
+    cs-gpios = <&porta 17 GPIO_ACTIVE_LOW>;
+
+    /* winc1500 node */
+    winc1500: winc1500@0 {
+        compatible = "atmel,winc1500";
+        status = "okay";
+
+        reg = <0>;
+        spi-max-frequency = <12000000>;
+        irq-gpios = <&portb 14 GPIO_ACTIVE_LOW>;
+        reset-gpios = <&porta 20 GPIO_ACTIVE_HIGH>;
+        enable-gpios = <&porta 21 GPIO_ACTIVE_HIGH>,
+                        <&portb 15 GPIO_ACTIVE_HIGH>;
+    };
+};
+

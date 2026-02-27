@@ -1,0 +1,54 @@
+#include <zephyr/dt-bindings/display/panel.h>
+
+/{
+    aliases {
+        spi4 = &sercom4;
+    };
+
+    chosen {
+        zephyr,display = &gc9x01x_lcd;
+    };   
+};
+
+/*************************************************************
+                Mikroe socket connections for 
+                Adafruit EyeSPI display
+
+       1  NC                    16  BACKLIGHT   PB08
+       2  TFT_RST   PA06        15  TFT_DC      PB07
+       3  TFT_CS    PB28        14  CARD_CS     PA05
+       4  SCK       PB26        13  NC
+       5  MISO      PB29        12  NC
+       6  MOSI      PB27        11  NC
+       7  +3V3                  10  +5V  
+       8  GND                   9   GND
+
+ *************************************************************/
+
+&sercom4 {
+    status = "okay";
+
+    /* Use SPI SS pin as GPIO CS */
+    cs-gpios = <&portb 28 GPIO_ACTIVE_LOW>;
+
+    my_mipi_dbi {
+        compatible = "zephyr,mipi-dbi-spi";
+        status = "okay";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        spi-dev = <&sercom4>;
+        dc-gpios = <&portb 7 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&porta 6 GPIO_ACTIVE_LOW>;
+
+        gc9x01x_lcd: gc9x01x_lcd@0 {
+            compatible = "galaxycore,gc9x01x";
+            reg = <0>;
+            mipi-max-frequency = <20000000>;
+            pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
+            width = <240>;
+            height = <240>;
+            display-inversion;
+        };
+    };
+};
+

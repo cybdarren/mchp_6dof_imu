@@ -1,0 +1,57 @@
+#include <zephyr/dt-bindings/sensor/icm42688.h>
+
+/{
+    aliases {
+        imusensor = &icm42688;
+        spi0 = &sercom0; 
+    };
+};
+
+&sercom0 {
+    status = "okay";
+    
+    /* Use SPI SS pin as GPIO CS */
+    cs-gpios = <&porta 5 GPIO_ACTIVE_LOW>;
+
+    /* ICM42688 IMU node */
+    icm42688: icm42688@0 {
+        status = "okay";
+        compatible = "invensense,icm42688", "invensense,icm4268x";
+        reg = <0>;
+        spi-max-frequency = <1000000>;
+
+        /* Interrupt line */
+        int-gpios = <&portb 4 GPIO_ACTIVE_HIGH>;
+
+        accel-fs = <ICM42688_DT_ACCEL_FS_2>;
+        accel-odr = <ICM42688_DT_ACCEL_ODR_100>;
+
+        gyro-fs = <ICM42688_DT_GYRO_FS_2000>;
+        gyro-odr = <ICM42688_DT_GYRO_ODR_100>;
+
+        // turn on low noise mode for gyro and accel
+        accel-pwr-mode = <ICM42688_DT_ACCEL_LN>;
+        gyro-pwr-mode = <ICM42688_DT_GYRO_LN>;
+    };
+};
+
+&sercom1 {
+    status = "okay";
+
+    /* Use SPI SS pin as GPIO CS */
+    cs-gpios = <&porta 17 GPIO_ACTIVE_LOW>;
+
+    /* winc1500 node */
+    winc1500: winc1500@0 {
+        compatible = "atmel,winc1500";
+        status = "okay";
+
+        reg = <0>;
+        spi-max-frequency = <12000000>;
+        irq-gpios = <&portb 14 GPIO_ACTIVE_LOW>;
+        reset-gpios = <&porta 20 GPIO_ACTIVE_HIGH>;
+        enable-gpios = <&porta 21 GPIO_ACTIVE_HIGH>,
+                        <&portb 15 GPIO_ACTIVE_HIGH>;
+    };
+};
+

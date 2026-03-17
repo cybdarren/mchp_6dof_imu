@@ -113,7 +113,6 @@ uint8_t icm_read_reg(uint8_t reg)
 int main(void)
 {
     struct sensor_value accel[3];
-    double ax, ay, az;
     struct sensor_value gyro[3];
     struct sensor_value temperature;
     int ret;
@@ -223,9 +222,6 @@ int main(void)
             sensor_channel_get(imu, SENSOR_CHAN_ACCEL_XYZ, accel);
             sensor_channel_get(imu, SENSOR_CHAN_GYRO_XYZ, gyro);
             sensor_channel_get(imu, SENSOR_CHAN_DIE_TEMP, &temperature);
-            ax = -sensor_value_to_double(&accel[0]);
-            ay = sensor_value_to_double(&accel[1]);
-            az = sensor_value_to_double(&accel[2]);
 
             if (showing_chart) {
                 update_imu_chart(&accel[0], &accel[1], &accel[2]);

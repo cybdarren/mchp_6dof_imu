@@ -19,13 +19,6 @@ static lv_chart_series_t *ser_ax;
 static lv_chart_series_t *ser_ay;
 static lv_chart_series_t *ser_az;
 
-static lv_obj_t *legend;
-
-/* Optional labels for live values (currently disabled) */
-// static lv_obj_t *label_ax;
-// static lv_obj_t *label_ay;
-// static lv_obj_t *label_az;
-
 lv_obj_t* imu_chart_init(lv_obj_t *parent)
 {
     /* Create a chart object as a child of the given parent */
@@ -53,7 +46,7 @@ lv_obj_t* imu_chart_init(lv_obj_t *parent)
     lv_chart_set_update_mode(chart, LV_CHART_UPDATE_MODE_CIRCULAR);
     lv_obj_set_style_size(chart, 0, 0, LV_PART_INDICATOR);
 
-    /* 200 points per series, with a Y range matching normal accel values */
+    /* 120 points per series, with a Y range matching normal accel values */
     lv_chart_set_point_count(chart, 120);
     lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, -15, 15);
 
@@ -61,34 +54,6 @@ lv_obj_t* imu_chart_init(lv_obj_t *parent)
     ser_ax = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
     ser_ay = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
     ser_az = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
-
-    /*
-     * Legend (disabled): A small overlay showing current values for each axis.
-     * Uncomment below to enable.
-     */
-
-    // /* Legend container */
-    // legend = lv_obj_create(parent);
-    // lv_obj_set_style_bg_opa(legend, LV_OPA_TRANSP, 0);
-    // lv_obj_set_style_border_width(legend, 0, 0);
-    // lv_obj_set_size(legend, 180, 20);
-    // lv_obj_align(legend, LV_ALIGN_TOP_MID, 0, 4);
-
-    // /* Labels */
-    // label_ax = lv_label_create(legend);
-    // lv_label_set_text(label_ax, "AX");
-    // lv_obj_set_style_text_color(label_ax, lv_palette_main(LV_PALETTE_RED), 0);
-    // lv_obj_align(label_ax, LV_ALIGN_LEFT_MID, 0, 0);
-
-    // label_ay = lv_label_create(legend);
-    // lv_label_set_text(label_ay, "AY");
-    // lv_obj_set_style_text_color(label_ay, lv_palette_main(LV_PALETTE_GREEN), 0);
-    // lv_obj_align(label_ay, LV_ALIGN_CENTER, 0, 0);
-
-    // label_az = lv_label_create(legend);
-    // lv_label_set_text(label_az, "AZ");
-    // lv_obj_set_style_text_color(label_az, lv_palette_main(LV_PALETTE_BLUE), 0);
-    // lv_obj_align(label_az, LV_ALIGN_RIGHT_MID, 0, 0);
 
     return parent;
 }
@@ -131,11 +96,6 @@ void update_imu_chart(struct sensor_value *ax_sv,
         sy[(start_idx + i) % point_count] = LV_CHART_POINT_NONE;
         sz[(start_idx + i) % point_count] = LV_CHART_POINT_NONE;
     }
-
-    /* Optional: update the legend with live values (currently commented out) */
-    // lv_label_set_text_fmt(label_ax, "AX: %d", ax_val);
-    // lv_label_set_text_fmt(label_ay, "AY: %d", ay_val);
-    // lv_label_set_text_fmt(label_az, "AZ: %d", az_val);
 
     /* Force a redraw so the new points appear immediately */
     lv_chart_refresh(chart);

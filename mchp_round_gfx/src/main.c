@@ -21,9 +21,6 @@
 #include "imu_chart.h"
 #include "imu_text.h"
 
-#define SV_FMT "%d.%06d"  /* Format string for sensor_value printing */
-#define SV_ARG(x) (x).val1, abs((x).val2)  /* Args for sensor_value printing */
-
 #define SLEEP_TIME_MS 10  /* Main loop sleep time */
 
 static struct sensor_trigger imu_trigger;

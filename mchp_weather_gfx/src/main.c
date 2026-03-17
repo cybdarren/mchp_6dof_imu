@@ -1,8 +1,8 @@
 /*
- * Main application for IMU visualization on a round display.
+ * Main application for BME280 visualization on a round display.
  *
- * This program initializes an IMU sensor, display, and LVGL UI to show
- * accelerometer data in three modes: bubble level, rolling chart, and text.
+ * This program initializes a BME280 sensor, display, and LVGL UI to show
+ * sensor data in two modes: text display, rolling chart.
  * Button presses cycle between screens.
  */
 #include <zephyr/kernel.h>
@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bme280_text.h"
+#include "bme280_chart.h"
 
 #define SLEEP_TIME_MS 10  /* Main loop sleep time */
 
@@ -32,9 +33,11 @@ static const struct device *bme280 = DEVICE_DT_GET(DT_ALIAS(bme280sensor));
 
 /* Static storage for the LVGL screens */
 static lv_obj_t *text_screen = NULL;
+static lv_obj_t *chart_screen = NULL;
 
 typedef enum {
-    SCREEN_TEXT = 0
+    SCREEN_TEXT = 0,
+    SCREEN_CHART
 } screen_mode_t;
 
 static screen_mode_t current_screen = SCREEN_TEXT;
@@ -75,7 +78,7 @@ void bme_init(void)
 {
     k_work_init(&bme_work, bme_work_handler);
     k_timer_init(&bme_timer, bme_timer_handler, NULL);
-    k_timer_start(&bme_timer, K_MSEC(500), K_MSEC(500));
+    k_timer_start(&bme_timer, K_MSEC(250), K_MSEC(250));
 }
 
 /*
@@ -170,10 +173,14 @@ int main(void)
     printk("Display size: %dx%d\n", width, height);
 
     /* ======== LVGL Screen Initialization ======== */
-    /* Create bubble level screen */
+    /* Create text screen */
     text_screen = lv_obj_create(NULL);
     lv_scr_load(text_screen);
     bme280_text_init(text_screen);
+
+    /* Create chart screen */
+    chart_screen = lv_obj_create(NULL);
+    bme280_chart_init(chart_screen);
 
     /* Temporary welcome label */
     lv_obj_t *label = lv_label_create(lv_screen_active());
@@ -211,26 +218,27 @@ int main(void)
                 btn = NULL;
             }
 
-            // if (button_pressed) {
-            //     current_screen = (current_screen + 1) % 3;
+            if (button_pressed) {
+                current_screen = (current_screen + 1) % 2;
 
-            //     /* Load the new screen */
-            //     switch(current_screen) {
-            //         case SCREEN_LEVEL:
-            //             lv_scr_load(bubble_screen);
-            //             break;
-            //         case SCREEN_CHART:
-            //             lv_scr_load(chart_screen);
-            //             break;
-            //         case SCREEN_TEXT:
-            //             lv_scr_load(text_screen);
-            //             break;
-            //     }
-            // }
+                /* Load the new screen */
+                switch(current_screen) {
+                    case SCREEN_TEXT:
+                        lv_scr_load(text_screen);
+                        break;
+                    case SCREEN_CHART:
+                        lv_scr_load(chart_screen);
+                        break;
+                }
+            }
         }
 
         if (k_msgq_get(&bme_msgq, &data, K_NO_WAIT) == 0) {
-            update_bme280_text(&data[0], &data[1], &data[2]);
+            if (current_screen == SCREEN_TEXT) {
+                update_bme280_text(&data[0], &data[1], &data[2]);
+            } else {
+                update_bme280_chart(&data[0], &data[1], &data[2]);
+            }
         }
 
         /* Run LVGL timer handler for UI updates */

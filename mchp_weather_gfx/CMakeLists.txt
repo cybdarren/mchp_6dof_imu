@@ -33,4 +33,5 @@ target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_sources(app PRIVATE
     src/main.c
     src/bme280_text.c
+    src/bme280_chart.c
 )

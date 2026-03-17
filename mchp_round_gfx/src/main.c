@@ -1,4 +1,11 @@
-#include <zephyr/kernel.h>
+/*
+ * Main application for IMU visualization on a round display.
+ *
+ * This program initializes an IMU sensor, display, and LVGL UI to show
+ * accelerometer data in three modes: bubble level, rolling chart, and text.
+ * Button presses cycle between screens.
+ */
+ #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/input/input.h>
@@ -12,17 +19,18 @@
 #include <stdlib.h>
 #include "bubble_level.h"
 #include "imu_chart.h"
+#include "imu_text.h"
 
-#define SV_FMT "%d.%06d"
-#define SV_ARG(x) (x).val1, abs((x).val2)
+#define SV_FMT "%d.%06d"  /* Format string for sensor_value printing */
+#define SV_ARG(x) (x).val1, abs((x).val2)  /* Args for sensor_value printing */
 
-#define SLEEP_TIME_MS 10
+#define SLEEP_TIME_MS 10  /* Main loop sleep time */
 
 static struct sensor_trigger imu_trigger;
-static volatile int irq_from_sensor = 0;
+static volatile int irq_from_sensor = 0;  /* Flag set by IMU interrupt */
 
-static volatile int irq_from_button = 0;
-static bool button_pressed = false;
+static volatile int irq_from_button = 0;  /* Flag set by button interrupt */
+static bool button_pressed = false;  /* Current button state */
 
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
 
@@ -30,12 +38,23 @@ static const struct gpio_dt_spec switch0 = GPIO_DT_SPEC_GET(DT_ALIAS(sw0), gpios
 static const struct gpio_dt_spec switch1 = GPIO_DT_SPEC_GET_OR(DT_ALIAS(sw1), gpios, {0});
 static const struct device *imu = DEVICE_DT_GET(DT_ALIAS(imusensor));
 
-/* Static sotrage for the two screens */
+/* Static storage for the LVGL screens */
 static lv_obj_t *bubble_screen = NULL;
 static lv_obj_t *chart_screen = NULL;
-static bool showing_chart = false;
+static lv_obj_t *text_screen = NULL;
 
-// interrupt from imu
+typedef enum {
+    SCREEN_LEVEL = 0,
+    SCREEN_CHART,
+    SCREEN_TEXT
+} screen_mode_t;
+
+static screen_mode_t current_screen = SCREEN_LEVEL;
+
+/*
+ * IMU data-ready interrupt handler.
+ * Fetches sensor data when triggered.
+ */
 static void handle_imu_trigger(const struct device *dev, const struct sensor_trigger *trig)
 {
     if (trig->type == SENSOR_TRIG_DATA_READY) {
@@ -43,23 +62,28 @@ static void handle_imu_trigger(const struct device *dev, const struct sensor_tri
 
         if (rc < 0) {
             printk("Failed to fetch sensor data: %d\n", rc);
-            return;     
+            return;
         } else if (rc == 0) {
-            irq_from_sensor = 1;
+            irq_from_sensor = 1;  /* Signal main loop to process data */
         }
-    }   
+    }
 }
 
-// LVGL input read callback for button input device
+/*
+ * LVGL input device read callback for button input.
+ * Maps GPIO button state to LVGL touch events.
+ */
 static void lv_button_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
 {
-    // Map Zephyr button state to LVGL touch state
     button_pressed = gpio_pin_get_dt(&switch0) == 1;
     data->state = button_pressed ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
-    data->point.x = 120;
+    data->point.x = 120;  /* Dummy touch coordinates */
     data->point.y = 160;
 }
 
+/*
+ * Button input event callback (legacy, not used for LVGL).
+ */
 static void button_input_cb(struct input_event *evt, void *user_data)
 {
     if (evt->sync == 0) {
@@ -72,44 +96,6 @@ static void button_input_cb(struct input_event *evt, void *user_data)
 
 INPUT_CALLBACK_DEFINE(NULL, button_input_cb, NULL);
 
-/* SPI device from device tree */
-static const struct spi_dt_spec spi_dev =
-    SPI_DT_SPEC_GET(DT_NODELABEL(icm42688),
-                    SPI_WORD_SET(8) | SPI_TRANSFER_MSB,
-                    0);
-
-uint8_t icm_read_reg(uint8_t reg)
-{
-    uint8_t tx[3] = {reg | 0x80, 0x00, 0x00};
-    uint8_t rx[3];
-
-    const struct spi_buf tx_buf = {
-        .buf = tx,
-        .len = sizeof(tx),
-    };
-
-    const struct spi_buf rx_buf = {
-        .buf = rx,
-        .len = sizeof(rx),
-    };
-
-    const struct spi_buf_set tx_set = {
-        .buffers = &tx_buf,
-        .count = 1,
-    };
-
-    const struct spi_buf_set rx_set = {
-        .buffers = &rx_buf,
-        .count = 1,
-    };
-
-    spi_transceive_dt(&spi_dev, &tx_set, &rx_set);
-
-    printk("RX: %02X %02X %02X\n", rx[0], rx[1], rx[2]);
-
-    return rx[1];
-}
-
 int main(void)
 {
     struct sensor_value accel[3];
@@ -119,6 +105,7 @@ int main(void)
 
     printk("Application started\n");
 
+    /* Initialize LED GPIO */
     if (!gpio_is_ready_dt(&led)) {
         return 0;
     }
@@ -128,36 +115,30 @@ int main(void)
         return 0;
     }
 
-    // enable button interrupts
+    /* Enable button interrupts */
     if (device_is_ready(switch0.port)) {
-        gpio_pin_interrupt_configure_dt(&switch0, GPIO_INPUT);  
+        gpio_pin_interrupt_configure_dt(&switch0, GPIO_INPUT);
     }
- 
-    if (device_is_ready(switch1.port)) {
-        gpio_pin_interrupt_configure_dt(&switch1, GPIO_INPUT);  
-    }   
 
-    // configure the imu
+    if (device_is_ready(switch1.port)) {
+        gpio_pin_interrupt_configure_dt(&switch1, GPIO_INPUT);
+    }
+
+    /* Configure the IMU device */
     if (imu == NULL) {
         printk("IMU device not found\n");
-        return 0;       
+        return 0;
     }
-	printf("Device %p name is %s\n", imu, imu->name);
+    printf("Device %p name is %s\n", imu, imu->name);
 
     if (device_is_ready(imu)) {
         printk("IMU device is ready\n");
     } else {
         printk("IMU device is not ready\n");
-
-        printk("ICM42688 SPI test\n");
-        while (1) {
-            uint8_t who = icm_read_reg(0x75);
-            printk("WHO_AM_I = 0x%02X\n", who);
-            k_sleep(K_SECONDS(1));
-        }
+        return 0;
     }
 
-    // configure interrupts from the IMU
+    /* Set up IMU data-ready trigger */
     imu_trigger = (struct sensor_trigger){
         .type = SENSOR_TRIG_DATA_READY,
         .chan = SENSOR_CHAN_ALL,
@@ -169,20 +150,19 @@ int main(void)
         printk("Failed to set IMU trigger (%d)\n", ret);
     }
 
-    // Start the display driver and LVGL
-	const struct device *display_dev;
+    /* Initialize display and LVGL */
+    const struct device *display_dev;
 
-	display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
-	if (!device_is_ready(display_dev)) {
-		printk("Device not ready, aborting test\n");
+    display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
+    if (!device_is_ready(display_dev)) {
+        printk("Device not ready, aborting test\n");
         return 0;
-	}
+    }
 
-    // enforce RGB565 if not set in DTS
     display_set_pixel_format(display_dev, PIXEL_FORMAT_RGB_565);
     display_blanking_off(display_dev);
 
-    // create and register the LVGL input device
+    /* Create LVGL input device for button */
     lv_indev_t *indev = lv_indev_create();
     lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(indev, lv_button_read);
@@ -193,18 +173,18 @@ int main(void)
     uint16_t height = caps.y_resolution;
     printk("Display size: %dx%d\n", width, height);
 
-    /* ======== LVGL initialization ======== */
-    // create the bubble screen
+    /* ======== LVGL Screen Initialization ======== */
+    /* Create bubble level screen */
     bubble_screen = lv_obj_create(NULL);
     lv_scr_load(bubble_screen);
     bubble_level_init(bubble_screen);
 
-    /* create label */
+    /* Temporary welcome label */
     lv_obj_t *label = lv_label_create(lv_screen_active());
     lv_label_set_text(label, "Hello Zephyr + LVGL!");
     lv_obj_center(label);
 
-    /* Create button */
+    /* Temporary next button */
     lv_obj_t *btn = lv_button_create(lv_screen_active());
     lv_obj_set_size(btn, 80, 40);
     lv_obj_align(btn, LV_ALIGN_CENTER, 0, 60);
@@ -213,51 +193,77 @@ int main(void)
     lv_label_set_text(btn_label, "Next");
     lv_obj_center(btn_label);
 
-    /* create the chart screen */
+    /* Create chart screen */
     chart_screen = lv_obj_create(NULL);
     imu_chart_init(chart_screen);
 
+    /* Create text screen */
+    text_screen = lv_obj_create(NULL);
+    imu_text_init(text_screen);
+
+    /* Main application loop */
     while (1) {
+        /* Process IMU data if available */
         if (irq_from_sensor) {
             sensor_channel_get(imu, SENSOR_CHAN_ACCEL_XYZ, accel);
             sensor_channel_get(imu, SENSOR_CHAN_GYRO_XYZ, gyro);
             sensor_channel_get(imu, SENSOR_CHAN_DIE_TEMP, &temperature);
 
-            if (showing_chart) {
-                update_imu_chart(&accel[0], &accel[1], &accel[2]);
-            } else {
-                update_bubble_physics(&accel[0], &accel[1], &accel[2]);  
+            /* Update the current screen with accel data */
+            switch(current_screen) {
+                case SCREEN_LEVEL:
+                    update_bubble_physics(&accel[0], &accel[1], &accel[2]);
+                    break;
+                case SCREEN_CHART:
+                    update_imu_chart(&accel[0], &accel[1], &accel[2]);
+                    break;
+                case SCREEN_TEXT:
+                    update_imu_text(&accel[0], &accel[1], &accel[2]);
+                    break;
             }
             irq_from_sensor = 0;
         }
 
+        /* Toggle LED */
         ret = gpio_pin_toggle_dt(&led);
         if (ret < 0) {
-            return 0;   
+            return 0;
         }
 
+        /* Handle button press to switch screens */
         if (irq_from_button) {
             irq_from_button = 0;
             button_pressed = gpio_pin_get_dt(&switch0) == 1;
-            // Remove the label
+            /* Remove welcome UI elements on first press */
             if (label != NULL) {
                 lv_obj_del(label);
                 label = NULL;
             }
+            if (btn != NULL) {
+                lv_obj_del(btn);
+                btn = NULL;
+            }
 
             if (button_pressed) {
-                if (showing_chart) {
-                    lv_scr_load(bubble_screen);
-                    showing_chart = false;
-                } else {
-                    lv_scr_load(chart_screen);
-                    showing_chart = true;
+                current_screen = (current_screen + 1) % 3;
+
+                /* Load the new screen */
+                switch(current_screen) {
+                    case SCREEN_LEVEL:
+                        lv_scr_load(bubble_screen);
+                        break;
+                    case SCREEN_CHART:
+                        lv_scr_load(chart_screen);
+                        break;
+                    case SCREEN_TEXT:
+                        lv_scr_load(text_screen);
+                        break;
                 }
             }
-        }   
+        }
 
-        // Let LVGL process tasks and trigger flush
-        lv_timer_handler(); 
+        /* Run LVGL timer handler for UI updates */
+        lv_timer_handler();
 
         k_msleep(SLEEP_TIME_MS);
     }

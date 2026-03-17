@@ -34,4 +34,5 @@ target_sources(app PRIVATE
     src/main.c
     src/bubble_level.c
     src/imu_chart.c 
+    src/imu_text.c
 )

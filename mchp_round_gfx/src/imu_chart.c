@@ -1,10 +1,3 @@
-#include <zephyr/kernel.h>
-#include <zephyr/sys/printk.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <lvgl.h>
-#include <math.h>
-#include "imu_chart.h"
 
 /*
  * A simple LVGL chart implementation that plots IMU acceleration
@@ -13,6 +6,13 @@
  * The chart is configured as a circular rolling buffer, where new values
  * replace the oldest ones.  This gives an "oscilloscope" feel.
  */
+#include <zephyr/kernel.h>
+#include <zephyr/sys/printk.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <lvgl.h>
+#include <math.h>
+#include "imu_chart.h"
 
 static lv_obj_t *chart;
 static lv_chart_series_t *ser_ax;

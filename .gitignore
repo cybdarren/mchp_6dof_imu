@@ -8,7 +8,7 @@
 /build_same54_xpro
 /build_arduino_nano_33_iot
 /build_mchp_gfx
-/build_mchp_wether_gfx
+/build_mchp_weather_gfx
 /zephyr/build
 /.west
 /zephyr/.west

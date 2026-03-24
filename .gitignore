@@ -9,6 +9,7 @@
 /build_arduino_nano_33_iot
 /build_mchp_gfx
 /build_mchp_weather_gfx
+/build_mchp_range_gfx
 /zephyr/build
 /.west
 /zephyr/.west

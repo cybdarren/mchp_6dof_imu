@@ -1,0 +1,86 @@
+#include <zephyr/dt-bindings/display/panel.h>
+
+/{
+    aliases {
+        vl6180xsensor = &vl6180x;
+        spi6 = &sercom6;
+    };
+
+    chosen {
+        zephyr,display = &gc9x01x_lcd;
+    };   
+};
+
+&pinctrl {
+	sercom6_spi_default: sercom6_spi_default {
+		group1 {
+			pinmux = <PC5C_SERCOM6_PAD1>,
+                    <PC4C_SERCOM6_PAD0>,
+	                <PC7C_SERCOM6_PAD3>;
+		};
+	};
+
+    sercom3_i2c_default: sercom3_i2c_default {
+        group1 {
+            pinmux = <PA22C_SERCOM3_PAD0>,
+                    <PA23C_SERCOM3_PAD1>;
+        };
+    };
+};
+
+&sercom3 {
+    status = "okay";
+    compatible = "atmel,sam0-i2c";
+    clock-frequency = <I2C_BITRATE_FAST>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-0 = <&sercom3_i2c_default>;
+    pinctrl-names = "default";
+
+    vl6180x: vl6180x@29 {
+        status = "okay";
+        compatible = "st,vl6180x";
+        reg = <0x29>;
+
+        int-gpios = <&portb 7 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        en-gpios = <&portb 28 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        continuous-mode;
+    };
+};
+
+&sercom6 {
+    status = "okay";
+    compatible = "atmel,sam0-spi";
+    dipo = <3>;
+    dopo = <0>;
+
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    pinctrl-0 = <&sercom6_spi_default>;
+	pinctrl-names = "default";
+
+    /* Use SPI SS pin as GPIO CS */
+    cs-gpios = <&portc 6 GPIO_ACTIVE_LOW>;
+
+    my_mipi_dbi {
+        compatible = "zephyr,mipi-dbi-spi";
+        status = "okay";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        spi-dev = <&sercom6>;
+        dc-gpios = <&portd 0 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&portb 1 GPIO_ACTIVE_LOW>;
+
+        gc9x01x_lcd: gc9x01x_lcd@0 {
+            compatible = "galaxycore,gc9x01x";
+            reg = <0>;
+            mipi-max-frequency = <20000000>;
+            pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
+            width = <240>;
+            height = <240>;
+            display-inversion;
+        };
+    };
+};
+

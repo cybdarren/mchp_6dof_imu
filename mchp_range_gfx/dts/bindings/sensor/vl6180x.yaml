@@ -1,0 +1,26 @@
+# dts/bindings/sensor/vl6180x.yaml
+description: "ST VL6180X Time-of-Flight Distance Sensor"
+compatible: "st,vl6180x"
+
+properties:
+  int-gpios:
+    type: phandle-array
+    required: false
+    description: "Optional interrupt GPIO line"
+
+  en-gpios:
+    type: phandle-array
+    required: false
+    description: "Optional enable GPIO line"
+
+  continuous-mode:
+    type: boolean
+    required: false
+    description: "Enable continuous measurement mode if present"
+
+  reg:
+    type: int
+    required: true
+    description: "I2C address of the sensor"
+
+# Optional: define any standard Zephyr sensor properties

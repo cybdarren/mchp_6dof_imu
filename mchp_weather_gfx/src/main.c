@@ -149,6 +149,14 @@ int main(void)
         return 0;
     }
 
+    const struct device *sercom_dev = DEVICE_DT_GET(DT_NODELABEL(sercom3));
+    if (!device_is_ready(sercom_dev)) {
+        printk("SERCOM3 I2C NOT READY\n");
+    } else {
+        printk("SERCOM3 I2C READY\n");
+    }
+
+
     /* Initialize display and LVGL */
     const struct device *display_dev;
 
@@ -182,11 +190,6 @@ int main(void)
     chart_screen = lv_obj_create(NULL);
     bme280_chart_init(chart_screen);
 
-    /* Temporary welcome label */
-    lv_obj_t *label = lv_label_create(lv_screen_active());
-    lv_label_set_text(label, "Hello Zephyr + LVGL!");
-    lv_obj_center(label);
-
     /* Temporary next button */
     lv_obj_t *btn = lv_button_create(lv_screen_active());
     lv_obj_set_size(btn, 80, 40);
@@ -209,10 +212,6 @@ int main(void)
             irq_from_button = 0;
             button_pressed = gpio_pin_get_dt(&switch0) == 1;
             /* Remove welcome UI elements on first press */
-            if (label != NULL) {
-                lv_obj_del(label);
-                label = NULL;
-            }
             if (btn != NULL) {
                 lv_obj_del(btn);
                 btn = NULL;

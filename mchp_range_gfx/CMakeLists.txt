@@ -33,5 +33,7 @@ target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_sources(app PRIVATE
     src/main.c
     src/range_text.c
+    src/range_chart.c
+    src/range_dial.c
     src/vl6180x.c
 )

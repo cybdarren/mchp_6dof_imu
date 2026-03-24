@@ -25,7 +25,7 @@ lv_obj_t* range_text_init(lv_obj_t *parent)
     /* Create the main container for the text display */
     screen_text = lv_obj_create(parent);
     lv_obj_set_style_bg_color(screen_text, lv_color_black(), 0);
-    lv_obj_set_size(screen_text, 180, 180);
+    lv_obj_set_size(screen_text, 180, 100);
     lv_obj_center(screen_text);
 
      /* Create the distance label */

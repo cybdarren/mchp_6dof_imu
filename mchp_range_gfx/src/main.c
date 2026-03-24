@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include "vl6180x.h"
 #include "range_text.h"
+#include "range_chart.h"
+#include "range_dial.h"
 
 #define SLEEP_TIME_MS 100  /* Main loop sleep time */
 
@@ -35,9 +37,12 @@ static const struct device *vl6180_dev = DEVICE_DT_GET_ANY(st_vl6180x);
 /* Static storage for the LVGL screens */
 static lv_obj_t *text_screen = NULL;
 static lv_obj_t *chart_screen = NULL;
+static lv_obj_t *dial_screen = NULL;
 
 typedef enum {
-    SCREEN_TEXT = 0
+    SCREEN_TEXT = 0,
+    SCREEN_CHART,
+    SCREEN_DIAL
 } screen_mode_t;
 
 static screen_mode_t current_screen = SCREEN_TEXT;
@@ -123,6 +128,12 @@ int main(void)
     lv_scr_load(text_screen);
     range_text_init(text_screen);
 
+    chart_screen = lv_obj_create(NULL);
+    range_chart_init(chart_screen);
+
+    dial_screen = lv_obj_create(NULL);
+    range_dial_init(dial_screen);
+
     /* Temporary next button */
     lv_obj_t *btn = lv_button_create(lv_screen_active());
     lv_obj_set_size(btn, 80, 40);
@@ -151,25 +162,37 @@ int main(void)
                 btn = NULL;
             }
 
-        //     if (button_pressed) {
-        //         current_screen = (current_screen + 1) % 2;
+            if (button_pressed) {
+                current_screen = (current_screen + 1) % 3;
 
-        //         /* Load the new screen */
-        //         switch(current_screen) {
-        //             case SCREEN_TEXT:
-        //                 lv_scr_load(text_screen);
-        //                 break;
-        //             case SCREEN_CHART:
-        //                 lv_scr_load(chart_screen);
-        //                 break;
-        //         }
-        //     }
+                /* Load the new screen */
+                switch(current_screen) {
+                    case SCREEN_TEXT:
+                        lv_scr_load(text_screen);
+                        break;
+                    case SCREEN_CHART:
+                        lv_scr_load(chart_screen);
+                        break;
+                    case SCREEN_DIAL:
+                        lv_scr_load(dial_screen);
+                        break;
+                }
+            }
         }
 
         if (sensor_sample_fetch(vl6180_dev) == 0) {
             sensor_channel_get(vl6180_dev, SENSOR_CHAN_DISTANCE, &val);
-            update_range_text(&val);
-            //printk("Distance: %d mm ", val.val1);
+            switch(current_screen) {
+                case SCREEN_TEXT:
+                    update_range_text(&val);
+                    break;
+                case SCREEN_CHART:
+                    update_range_chart(&val);
+                    break;
+                case SCREEN_DIAL:
+                    update_range_dial(&val);
+                    break;
+            }
         }
 
         /* Run LVGL timer handler for UI updates */

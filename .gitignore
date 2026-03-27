@@ -10,6 +10,7 @@
 /build_mchp_gfx
 /build_mchp_weather_gfx
 /build_mchp_range_gfx
+/build_mchp_hrm_gfx
 /zephyr/build
 /.west
 /zephyr/.west

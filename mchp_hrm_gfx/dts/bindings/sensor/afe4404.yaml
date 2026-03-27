@@ -1,0 +1,21 @@
+# dts/bindings/sensor/afe4404.yaml
+description: "TI AFE4404 Heart Rate Sensor"
+compatible: "ti,afe4404"
+
+properties:
+  int-gpios:
+    type: phandle-array
+    required: false
+    description: "Optional interrupt GPIO line"
+
+  rst-gpios:
+    type: phandle-array
+    required: false
+    description: "Optional Reset GPIO line"
+
+  reg:
+    type: int
+    required: true
+    description: "I2C address of the sensor"
+
+# Optional: define any standard Zephyr sensor properties

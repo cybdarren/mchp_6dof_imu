@@ -1,0 +1,236 @@
+/*
+ * Copyright (c) 2020 Google LLC.
+ * Copyright (c) 2024 Daikin Comfort Technologies North America, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include <atmel/samd5xx19.dtsi>
+#include <zephyr/dt-bindings/display/panel.h>
+#include <zephyr/dt-bindings/led/led.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include "feather_m4_zephyr_ot-pinctrl.dtsi"
+
+/ {
+	model = "Adafruit Feather M4 Express OT";
+	compatible = "adafruit,feather_m4_zephyr_ot";
+
+	chosen {
+		zephyr,console = &sercom5;
+		zephyr,shell-uart = &sercom5;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &code_partition;
+		zephyr,display = &gc9x01x_lcd;
+	};
+
+	/* These aliases are provided for compatibility with samples */
+	aliases {
+		led0 = &led0;
+		led-strip0 = &ws2812_0;
+		led-strip1 = &ws2812_1;
+		sw0 = &user_button0;
+		sw1 = &user_button1;
+		pwm-0 = &tcc0;
+		pwm-1 = &tc0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		/* the red LED on the Feather M4 */
+		led0: led_0 {
+			gpios = <&porta 23 0>;
+			label = "LED";
+		};
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+
+		user_button0: button_0 {
+			gpios = <&porta 16 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "SW0";
+			zephyr,code = <INPUT_KEY_1>;
+		}; 
+	
+		user_button1: button_1 {
+			gpios = <&porta 18 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "SW1";
+			zephyr,code = <INPUT_KEY_2>;
+		};
+	}; 
+
+   	ws2812_0: ws2812_0 {
+		status = "okay";
+        compatible = "custom,ws2812";
+        gpios = <&portb 3 GPIO_ACTIVE_HIGH>;   /* PB03 */
+        num_leds = <1>;
+    };
+
+    ws2812_1: ws2812_1 {
+		status = "okay";
+        compatible = "custom,ws2812";
+        gpios = <&porta 14 GPIO_ACTIVE_HIGH>;   /* PA14 */
+        num_leds = <2>;
+    };
+};
+
+&cpu0 {
+	clock-frequency = <120000000>;
+};
+
+/* SPI interface to IPS display and the Mikroe socket
+ *
+ *	SCK 		PA17		___ DOPO = 2
+ *	MOSI		PB23 		_|
+ *	MISO 		PB22 		DIPO = 2
+ *
+ * 	Chip Selects
+ * 	CARD_CS		PA05 		SDCard on IPS display
+ * 	TFT_CS		PA21		IPS display
+ *	CS			PA06		Mikroe Click CS 
+ */
+&sercom1 {
+	status = "okay";
+	compatible = "atmel,sam0-spi";
+	dipo = <2>;
+	dopo = <2>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-0 = <&sercom1_spi_default>;
+	pinctrl-names = "default";
+
+    /* Use SPI SS pin as GPIO CS */
+    cs-gpios = <&porta 21 GPIO_ACTIVE_LOW>;
+
+    my_mipi_dbi {
+        compatible = "zephyr,mipi-dbi-spi";
+        status = "okay";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        spi-dev = <&sercom1>;
+        dc-gpios = <&porta 20 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&porta 19 GPIO_ACTIVE_LOW>;
+
+        gc9x01x_lcd: gc9x01x_lcd@0 {
+            compatible = "galaxycore,gc9x01x";
+            reg = <0>;
+            mipi-max-frequency = <20000000>;
+            pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
+            width = <240>;
+            height = <240>;
+            display-inversion;
+        };
+    };
+
+};
+
+/* I2C interface to the Mikroe socket
+ *
+ *	SCL			PA13 
+ *	SDA 		PA12
+ */
+&sercom2 {
+    status = "disabled";
+    compatible = "atmel,sam0-i2c";
+    clock-frequency = <I2C_BITRATE_FAST>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    pinctrl-0 = <&sercom2_i2c_default>;
+    pinctrl-names = "default";
+};
+
+/* UART interface to the RNBD451PE Bluetooth OR ESP32-C3
+ *
+ *	TX			PA22 
+ *	RX 			PA23 
+ */
+&sercom3 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <115200>;
+	rxpo = <1>;
+	txpo = <0>;
+	pinctrl-0 = <&sercom3_uart_default>;
+	pinctrl-names = "default";	
+};
+
+/* UART interface to the Mikroe socket
+ *
+ *	TX 			PB16 
+ *	RX 			PB17 
+ */
+&sercom5 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <115200>;
+	rxpo = <1>;
+	txpo = <0>;
+	pinctrl-0 = <&sercom5_uart_default>;
+	pinctrl-names = "default";
+};
+
+/*
+&tcc0 {
+	status = "disabled";
+	compatible = "atmel,sam0-tcc-pwm";
+	prescaler = <8>;
+	#pwm-cells = <2>;
+	pinctrl-0 = <&pwm0_default>;
+	pinctrl-names = "default";
+};
+
+&tc0 {
+	status = "disabled";
+	compatible = "atmel,sam0-tc-pwm";
+	prescaler = <1024>;
+	#pwm-cells = <2>;
+	channels = <2>;
+	counter-size = <16>;
+	pinctrl-0 = <&tc0_default>;
+	pinctrl-names = "default";
+};
+*/
+
+zephyr_udc0: &usb0 {
+	status = "okay";
+	pinctrl-0 = <&usb_dc_default>;
+	pinctrl-names = "default";
+};
+
+&dmac {
+	status = "okay";
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "uf2";
+			reg = <0x00000000 DT_SIZE_K(16)>;
+			read-only;
+		};
+
+		code_partition: partition@4000 {
+			label = "code";
+			reg = <0x4000 DT_SIZE_K(512-16-16)>;
+			read-only;
+		};
+
+		/*
+		 * The final 16 KiB is reserved for the application.
+		 * Storage partition will be used by FCB/LittleFS/NVS
+		 * if enabled.
+		 */
+		storage_partition: partition@7c000 {
+			label = "storage";
+			reg = <0x7c000 DT_SIZE_K(16)>;
+		};
+	};
+};

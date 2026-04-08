@@ -1,0 +1,6 @@
+board:
+  name: feather_m4_zephyr_ot
+  full_name: Feather M4 Zephyr Out of Tree Board
+  vendor: adafruit
+  socs:
+    - name: samd51j19a

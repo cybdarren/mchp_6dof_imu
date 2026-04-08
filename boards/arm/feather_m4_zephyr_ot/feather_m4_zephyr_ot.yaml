@@ -1,0 +1,19 @@
+identifier: feather_m4_zephyr_ot
+name: Feather M4 Zephyr OT
+type: mcu
+arch: arm
+ram: 192
+flash: 512
+toolchain:
+  - zephyr
+  - gnuarmemb
+supported:
+  - dma
+  - gpio
+  - hwinfo
+  - pwm
+  - spi
+  - uart
+  - usb_device
+  - watchdog
+vendor: adafruit

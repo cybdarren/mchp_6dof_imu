@@ -1,0 +1,7 @@
+menu "WS2812 Common"
+
+config WS2812_COMMON
+    bool "WS2812 common library"
+    default y
+
+endmenu    

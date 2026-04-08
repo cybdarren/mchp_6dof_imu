@@ -11,7 +11,9 @@
 /build_mchp_weather_gfx
 /build_mchp_range_gfx
 /build_mchp_hrm_gfx
+/build_mchp_hw_test
 /zephyr/build
+/nina_ble_uart
 /.west
 /zephyr/.west
 /Kconfig

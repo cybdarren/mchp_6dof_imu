@@ -74,9 +74,9 @@ __attribute__((always_inline)) static inline void ws2812_send_bit_asm(volatile u
     if (bit) {
         __asm__ volatile (
             "str %[mask], [%[outset]] \n\t"   // Set pin high
-            NOP_N_TIMES(84)
+            NOP_N_TIMES(81)
             "str %[mask], [%[outclr]] \n\t"   // Set pin low
-            NOP_N_TIMES(60) 
+            NOP_N_TIMES(40) 
             :
             : [outset]"r"(outset), [outclr]"r"(outclr), [mask]"r"(mask)
             : "memory"
@@ -84,9 +84,9 @@ __attribute__((always_inline)) static inline void ws2812_send_bit_asm(volatile u
     } else {
         __asm__ volatile (
             "str %[mask], [%[outset]] \n\t"   // Set pin high
-            NOP_N_TIMES(42)
+            NOP_N_TIMES(41)
             "str %[mask], [%[outclr]] \n\t"   // Set pin low
-            NOP_N_TIMES(80) 
+            NOP_N_TIMES(79) 
             :
             : [outset]"r"(outset), [outclr]"r"(outclr), [mask]"r"(mask)
             : "memory"

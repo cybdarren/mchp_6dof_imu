@@ -64,13 +64,7 @@ int main(void)
     ws2812_update(1);
 
     ws2812_set_pixel(0, 0, 64, 0, 0);  /* Set first LED of strip 0 to red */
-    ws2812_update(0);
-    // const struct device *porta = DEVICE_DT_GET(DT_NODELABEL(porta));
-    // if (!device_is_ready(porta)) {
-    //     printk("PORTA device not ready\n");
-    //     return 0;
-    // }
-    // ret = gpio_pin_configure(porta, 14, GPIO_OUTPUT);   
+    ws2812_update(0); 
 
     /* Initialize display and LVGL */
     const struct device *display_dev;
@@ -102,7 +96,6 @@ int main(void)
             ws2812_update(1);
         }   
         strip_toggle = !strip_toggle;
-        // gpio_pin_toggle(porta, 14);
 
         /* Run LVGL timer handler for UI updates */
         lv_timer_handler();

@@ -38,6 +38,7 @@ target_include_directories(app PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
 
 target_sources(app PRIVATE
     src/main.c
+    src/img_util.c
 )
 
 target_link_libraries(app PRIVATE ws2812_common)

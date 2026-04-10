@@ -89,8 +89,8 @@
  *	MISO 		PB22 		DIPO = 2
  *
  * 	Chip Selects
- * 	CARD_CS		PA05 		SDCard on IPS display
  * 	TFT_CS		PA21		IPS display
+ * 	CARD_CS		PA05 		SDCard on IPS display
  *	CS			PA06		Mikroe Click CS 
  */
 &sercom1 {
@@ -103,9 +103,11 @@
 	pinctrl-0 = <&sercom1_spi_default>;
 	pinctrl-names = "default";
 
-    /* Use SPI SS pin as GPIO CS */
-    cs-gpios = <&porta 21 GPIO_ACTIVE_LOW>;
+    /* Handle multiple CS on same SPI */
+    cs-gpios = <&porta 21 GPIO_ACTIVE_LOW>,
+				<&porta 5 GPIO_ACTIVE_LOW>;
 
+	/* the LCD display */
     my_mipi_dbi {
         compatible = "zephyr,mipi-dbi-spi";
         status = "okay";
@@ -117,7 +119,7 @@
 
         gc9x01x_lcd: gc9x01x_lcd@0 {
             compatible = "galaxycore,gc9x01x";
-            reg = <0>;
+            reg = <0>;			/* CS index 0 */
             mipi-max-frequency = <20000000>;
             pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
             width = <240>;
@@ -126,6 +128,18 @@
         };
     };
 
+	/* the SDCard on the back of the display */
+	sdhc0: sdhc@0 {
+		compatible = "zephyr,sdhc-spi-slot";
+		reg = <1>;
+		status = "okay";
+		mmc {
+			compatible = "zephyr,sdmmc-disk";
+			disk-name="SD";
+			status = "okay";
+		};
+		spi-max-frequency = <12000000>;
+	};
 };
 
 /* I2C interface to the Mikroe socket

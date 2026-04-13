@@ -17,9 +17,8 @@
 	compatible = "adafruit,feather_m4_zephyr_ot";
 
 	chosen {
-/*		zephyr,console = &sercom5; */
 		zephyr,console = &cdc_acm_uart0;
-		zephyr,shell-uart = &sercom5;
+/*		zephyr,shell-uart = &sercom5;*/
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
 		zephyr,code-partition = &code_partition;
@@ -179,7 +178,7 @@
  *	RX 			PB17 
  */
 &sercom5 {
-	status = "okay";
+	status = "disabled";
 	compatible = "atmel,sam0-uart";
 	current-speed = <115200>;
 	rxpo = <1>;

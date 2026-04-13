@@ -17,6 +17,7 @@
 #include <soc.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ws2812_common.h>
 #include "bme280_text.h"
 #include "bme280_chart.h"
 

@@ -1,0 +1,20 @@
+
+
+/{
+    aliases {
+        bme280sensor = &bme280;
+    };
+};
+
+/* I2C interface to the mikroe socket */
+&sercom2 {
+    status = "okay";
+
+    bme280: bme280@76 {
+        status = "okay";
+        compatible = "bosch,bme280";
+        reg = <0x76>;
+    };
+};
+
+

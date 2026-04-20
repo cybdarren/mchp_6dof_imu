@@ -16,7 +16,6 @@ int display_bin_image(const struct device *display,
     UINT br;
 
     uint16_t width, height;
-    uint16_t v;
 
     /* Open file */
     if (f_open(&file, path, FA_READ) != FR_OK) {
@@ -48,11 +47,6 @@ int display_bin_image(const struct device *display,
         if (br != width * 2) {
             printk("Read error at line %d\n", y);
             break;
-        }
-
-        for(int i = 0; i < width; i++) {
-            v = line_buf[i];
-            line_buf[i] = (v >> 8) | (v << 8);  // Swap bytes for little-endian display
         }
 
         /* Write one line to display */

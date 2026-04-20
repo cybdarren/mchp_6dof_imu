@@ -82,6 +82,26 @@ void bme_init(void)
     k_timer_start(&bme_timer, K_MSEC(250), K_MSEC(250));
 }
 
+void heartbeat_thread(void)
+{
+    while (1) {
+        gpio_pin_set_dt(&led, 1);
+        k_msleep(100);
+
+        gpio_pin_set_dt(&led, 0);
+        k_msleep(100);
+
+        gpio_pin_set_dt(&led, 1);
+        k_msleep(100);
+
+        gpio_pin_set_dt(&led, 0);
+        k_msleep(700);
+    }
+}
+
+K_THREAD_DEFINE(heartbeat_tid, 512, heartbeat_thread, NULL, NULL, NULL,
+                7, 0, 0);
+
 /*
  * LVGL input device read callback for button input.
  * Maps GPIO button state to LVGL touch events.
@@ -157,7 +177,6 @@ int main(void)
         printk("SERCOM3 I2C READY\n");
     }
 
-
     /* Initialize display and LVGL */
     const struct device *display_dev;
 
@@ -203,10 +222,10 @@ int main(void)
     /* Main application loop */
     while (1) {
         /* Toggle LED */
-        ret = gpio_pin_toggle_dt(&led);
-        if (ret < 0) {
-            return 0;
-        }
+        // ret = gpio_pin_toggle_dt(&led);
+        // if (ret < 0) {
+        //     return 0;
+        // }
 
         /* Handle button press to switch screens */
         if (irq_from_button) {

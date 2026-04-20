@@ -104,8 +104,8 @@ INPUT_CALLBACK_DEFINE(NULL, button_input_cb, NULL);
 void display_splash_screen(const struct device *display_dev)
 {
     lv_obj_t *scr = lv_scr_act();
-    lv_obj_set_style_bg_color(scr, lv_color_black(), LV_PART_MAIN); // Make it black
-    lv_refr_now(NULL);  // Force immediate refresh to show black background before loading image
+    lv_obj_set_style_bg_color(scr, lv_color_white(), LV_PART_MAIN); // Make it black
+    lv_refr_now(NULL);  // Force immediate refresh to show white background before loading image
 
     display_bin_image(display_dev, "0:/mchplogo.bin", 8, 15);
     k_msleep(3000);  // Show splash screen for 3 seconds
@@ -193,8 +193,8 @@ int main(void)
         }
 
         if (switch1_event) {
-            lv_obj_set_style_bg_color(lv_screen_active(), lv_color_black(), LV_PART_MAIN);
-            lv_refr_now(NULL);  // Force immediate refresh to show black background before loading image
+            lv_obj_set_style_bg_color(lv_screen_active(), lv_color_white(), LV_PART_MAIN);
+            lv_refr_now(NULL);  // Force immediate refresh to show white background before loading image
             if (display_bin_image(display_dev, "0:/mchplogo.bin", 8, 15) == -1) {
                 lv_label_set_text(label, "Failed to load image");
             }   

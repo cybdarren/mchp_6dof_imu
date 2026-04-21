@@ -160,6 +160,26 @@ void process_ppg(int32_t led1, int32_t aled1, int *out_bpm)
     }
 }
 
+void heartbeat_thread(void)
+{
+    while (1) {
+        gpio_pin_set_dt(&led, 1);
+        k_msleep(100);
+
+        gpio_pin_set_dt(&led, 0);
+        k_msleep(100);
+
+        gpio_pin_set_dt(&led, 1);
+        k_msleep(100);
+
+        gpio_pin_set_dt(&led, 0);
+        k_msleep(700);
+    }
+}
+
+K_THREAD_DEFINE(heartbeat_tid, 512, heartbeat_thread, NULL, NULL, NULL,
+                7, 0, 0);
+
 /*
  * LVGL input device read callback for button input.
  * Maps GPIO button state to LVGL touch events.
@@ -288,7 +308,7 @@ int main(void)
         }
 
         if (sensor_sample_fetch(hrm_dev) == 0) {
-            gpio_pin_toggle_dt(&led);  /* Toggle LED on each sample for visual heartbeat */
+            // gpio_pin_toggle_dt(&led);  /* Toggle LED on each sample for visual heartbeat */
             /* Read only the channels needed for PPG */
             sensor_channel_get(hrm_dev, SENSOR_CHAN_AFE4404_LED1, &led1);
             sensor_channel_get(hrm_dev, SENSOR_CHAN_AFE4404_ALED1, &aled1);

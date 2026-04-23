@@ -21,6 +21,7 @@ build_info.yml
 sysbuild_modules.txt
 zephyr_modules.txt
 zephyr_settings.txt
+/.claude
 
 # ======================================
 # Python virtual environment

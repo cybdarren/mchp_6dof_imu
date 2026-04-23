@@ -115,7 +115,7 @@ static void lv_button_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
 }
 
 /*
- * Button input event callback (legacy, not used for LVGL).
+ * Button input event callback
  */
 static void button_input_cb(struct input_event *evt, void *user_data)
 {

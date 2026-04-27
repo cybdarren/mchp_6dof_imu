@@ -12,6 +12,7 @@
 /build_mchp_range_gfx
 /build_mchp_hrm_gfx
 /build_mchp_hw_test
+/build_mchp_6dof_imu
 /zephyr/build
 /nina_ble_uart
 /.west
